@@ -3,8 +3,8 @@
 
 #include "avplayer.h"
 
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 720
+#define SCREEN_WIDTH 640 
+#define SCREEN_HEIGHT 360
 
 int AVPlayer::InitVideo()
 {
@@ -61,7 +61,8 @@ int AVPlayer::InitVideo()
 
 	pthread_t tid;
     pthread_create(&tid, NULL, VideoRenderThread, this);	
-	
+	pthread_detach(tid);
+
     return 0;
 }
 
@@ -192,7 +193,7 @@ int AVPlayer::FeedOneH264Frame(unsigned char* frame, int size)
 void AVPlayer::Dispose()
 {
 	mCodec->stop();
-	mCodec->reset();
+	//mCodec->reset();
 	mCodec->release();
 	mLooper->stop();
 	

@@ -19,19 +19,11 @@
 #include <gui/SurfaceComposerClient.h>
 #include <gui/Surface.h>
 #include <ui/DisplayInfo.h>
-//#include <media/stagefright/NativeWindowWrapper.h>
 
-#include <media/AudioTrack.h>
 #include <time.h>
 
 #define FRAME_SIZE 32768
 #define FRAME_COUNT 8
-
-struct audio_frame
-{
-    unsigned char* data;
-    int len;
-};
 
 using namespace android;
 
@@ -42,6 +34,10 @@ public:
 		mVideoFrameCount = 0;
 		mBeginTime = 0;
     }
+	~AVPlayer(){
+		Dispose();
+
+	}
 	
 	int InitVideo();
 	int FeedOneH264Frame(unsigned char* frame, int size);
@@ -69,8 +65,6 @@ public:
 	void Dispose();
 	
 private:
-	
-	void* mPrivate;
 	int mVideoFrameCount;
 	clock_t mBeginTime;
 };

@@ -11,22 +11,21 @@ LOCAL_CPPFLAGS :=
 
 LOCAL_MODULE := avtest
 
-LOCAL_MODULE_TAGS := eng optional
+LOCAL_MODULE_TAGS := optional
 
 LOCAL_SHARED_LIBRARIES := \
 	libc \
-	libstlport \
 	libstagefright liblog libutils libbinder libstagefright_foundation \
-    libmedia libgui libcutils libui libtinyalsa libusbhost libz
+    libmedia libmedia_omx libgui libcutils libui 
 	
 LOCAL_C_INCLUDES := \
-	external/stlport/stlport \
-    bionic/libstdc++/include \
-    bionic \
 	frameworks/av/media/libstagefright \
-	$(TOP)/frameworks/native/include/media/openmax \
+	frameworks/av/media/libstagefright/foundation/include \
+	bionic/libc/include/\
+    bionic \
+	$(TOP)/frameworks/native/include/media/openmax 
 	
-LOCAL_CFLAGS := 
+#LOCAL_CFLAGS := 
 
 LOCAL_LDFLAGS := -ldl
 

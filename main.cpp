@@ -61,7 +61,7 @@ private:
 
 int main()
 {
-	FILE* video_fp = fopen("/data/local/tmp/test.h264", "rb");
+	FILE* video_fp = fopen("/data/test.264", "rb");
 	unsigned char data_buffer[MAX_BUFFER_SIZE];
 	
 	VideoBuffer buffer;
@@ -87,5 +87,5 @@ int main()
 			buffer.DisposeOneFrame(i);
 		}
 	}
-	return NULL;	
+	return 0;	
 }

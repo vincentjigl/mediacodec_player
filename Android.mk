@@ -25,7 +25,7 @@ LOCAL_C_INCLUDES := \
     bionic \
 	$(TOP)/frameworks/native/include/media/openmax 
 	
-#LOCAL_CFLAGS := 
+LOCAL_CFLAGS := -Wno-reorder
 
 LOCAL_LDFLAGS := -ldl
 

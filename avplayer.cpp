@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <android/native_window.h>
 
 #include "avplayer.h"
@@ -6,16 +7,25 @@
 #define SCREEN_WIDTH 640 
 #define SCREEN_HEIGHT 360
 
+AVPlayer::AVPlayer(int w, int h, int x, int y, const char* path): 
+    mVideoFrameCount(0),
+    mBeginTime(0),
+    offsetx(x),
+    offsety(y),
+    mWidth(w),
+    mHeight(h),    
+    buf(new VideoBuffer()),
+    video_fp(NULL),
+    filePath(path)
+{
+
+}
+
 int AVPlayer::InitVideo()
 {
-	mWidth = SCREEN_WIDTH;
-	mHeight = SCREEN_HEIGHT;
-	
 	mRendering = true;
 	
 	ProcessState::self()->startThreadPool();
-
-    //DataSource::RegisterDefaultSniffers();
 	
 	mFormat = new AMessage;
 	
@@ -41,8 +51,7 @@ int AVPlayer::InitVideo()
 	
 	MakeBackground();
 	
-	mCodec = MediaCodec::CreateByType(
-                mLooper, "video/avc", false);
+	mCodec = MediaCodec::CreateByType(mLooper, "video/avc", false);
     
     sp<AMessage> format = new AMessage;
     format->setString("mime", "video/avc");
@@ -59,11 +68,38 @@ int AVPlayer::InitVideo()
     err = mCodec->getOutputBuffers(&mOutBuffers);
     CHECK_EQ(err, (status_t)OK);
 
+
+	video_fp = fopen(filePath, "rb");
+	unsigned char data_buffer[MAX_BUFFER_SIZE];
+	
+	buf->SetBuffer(data_buffer);
+
+    return 0;
+}
+
+void AVPlayer::Start(){
 	pthread_t tid;
     pthread_create(&tid, NULL, VideoRenderThread, this);	
 	pthread_detach(tid);
 
-    return 0;
+	while(true) {
+		unsigned char data[BULK_SIZE];
+		int len = fread(data, 1, BULK_SIZE, video_fp);
+		if (len <= 0)
+			break;
+		
+		buf->AppendBuffer(data, len);
+		
+		while(true) {
+			int nalSize = buf->SearchStartCode();
+			if (nalSize == 0)
+				break;
+			
+			FeedOneH264Frame(buf->GetBuffer(), nalSize);
+			buf->DisposeOneFrame(nalSize);
+		}
+	}
+
 }
 
 void AVPlayer::MakeBackground()
@@ -141,8 +177,7 @@ void AVPlayer::RenderFrames()
 	do {
 		CheckIfFormatChange();
 		
-		err = mCodec->dequeueOutputBuffer(
-			&index, &offset, &size, &pts, &flags);
+		err = mCodec->dequeueOutputBuffer(&index, &offset, &size, &pts, &flags);
 
 		if (err == OK) {
 			mCodec->renderOutputBufferAndRelease(index);
